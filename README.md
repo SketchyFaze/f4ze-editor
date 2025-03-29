@@ -21,7 +21,7 @@ A powerful browser-based photo editing application built with HTML, CSS, and Jav
 
 ## Live Demo
 
-Visit the live application: [F4ZE Editor](https://your-vercel-deployment-url.vercel.app)
+Visit the live application: [F4ZE Editor](https://editfaze.vercel.app/)
 
 ## Development
 
