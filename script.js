@@ -35,7 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
         textPosition: { x: 0, y: 0 },
         canvasScale: 1,
         canvasOffset: { x: 0, y: 0 },
-        originalImage: null
+        originalImage: null,
+        // Mobile touch states
+        isPinching: false,
+        lastDistance: 0,
+        doubleTapTimer: null,
+        lastTap: 0,
+        isMobileDevice: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     };
     
     // Layer class
@@ -953,6 +959,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Event listeners
+    // Handle pinch-to-zoom on mobile devices
+    function handlePinchZoom(e) {
+        if (e.touches.length !== 2) return;
+        e.preventDefault();
+        
+        // Calculate distance between touch points
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const currentDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) + 
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+        
+        if (!state.isPinching) {
+            state.isPinching = true;
+            state.lastDistance = currentDistance;
+            return;
+        }
+        
+        // Calculate zoom ratio
+        const scaleFactor = 0.005; // Adjust to control zoom sensitivity
+        const delta = currentDistance - state.lastDistance;
+        
+        // Update canvas scale
+        state.canvasScale = Math.max(0.5, Math.min(5, state.canvasScale + (delta * scaleFactor)));
+        
+        // Apply scale to canvas
+        const canvasWrapper = document.querySelector('.canvas-wrapper');
+        canvasWrapper.style.transform = `scale(${state.canvasScale})`;
+        
+        state.lastDistance = currentDistance;
+        updateCanvas();
+    }
+    
+    // Handle double tap to reset zoom
+    function handleDoubleTap(e) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - state.lastTap;
+        
+        if (tapLength < 300 && tapLength > 0) {
+            // Double tap detected
+            e.preventDefault();
+            
+            // Reset zoom
+            state.canvasScale = 1;
+            const canvasWrapper = document.querySelector('.canvas-wrapper');
+            canvasWrapper.style.transform = 'scale(1)';
+            updateCanvas();
+            
+            // Cancel any pending single tap
+            clearTimeout(state.doubleTapTimer);
+        } else {
+            // Single tap
+            state.doubleTapTimer = setTimeout(() => {
+                // Single tap action if needed
+            }, 300);
+        }
+        
+        state.lastTap = currentTime;
+    }
+
     function initEventListeners() {
         // Canvas events
         canvas.addEventListener('mousedown', startDrawing);
@@ -960,16 +1027,48 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseout', stopDrawing);
         
-        // Touch events for mobile
+        // Enhanced touch events for mobile
         canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            startDrawing(e);
+            // Check for pinch gesture
+            if (e.touches.length === 2) {
+                state.isPinching = true;
+                handlePinchZoom(e);
+                return;
+            }
+            
+            // Check for double-tap to reset zoom
+            handleDoubleTap(e);
+            
+            // Normal drawing
+            if (!state.isPinching) {
+                e.preventDefault();
+                startDrawing(e);
+            }
         });
+        
         canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            draw(e);
+            // Handle pinch gesture
+            if (e.touches.length === 2) {
+                handlePinchZoom(e);
+                return;
+            }
+            
+            // Normal drawing
+            if (!state.isPinching) {
+                e.preventDefault();
+                draw(e);
+            }
         });
-        canvas.addEventListener('touchend', stopDrawing);
+        
+        canvas.addEventListener('touchend', (e) => {
+            if (state.isPinching && e.touches.length < 2) {
+                state.isPinching = false;
+            }
+            
+            if (!state.isPinching) {
+                stopDrawing();
+            }
+        });
         
         // File operations
         document.getElementById('new-btn').addEventListener('click', createNewImage);
@@ -1128,11 +1227,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Apply mobile-specific adjustments
+    function applyMobileOptimizations() {
+        if (state.isMobileDevice) {
+            // Reduce default brush size for better precision on small screens
+            state.brushSize = 3;
+            document.getElementById('brush-size').value = 3;
+            document.getElementById('brush-size-value').textContent = '3px';
+            
+            // Add a help tooltip for double-tap and pinch gestures
+            const helpTip = document.createElement('div');
+            helpTip.className = 'mobile-help-tip';
+            helpTip.innerHTML = `
+                <p><strong>Mobile Gestures:</strong></p>
+                <p>• Double-tap: Reset zoom</p>
+                <p>• Pinch: Zoom in/out</p>
+            `;
+            helpTip.style.position = 'absolute';
+            helpTip.style.bottom = '10px';
+            helpTip.style.left = '10px';
+            helpTip.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            helpTip.style.color = '#fff';
+            helpTip.style.padding = '10px';
+            helpTip.style.borderRadius = '5px';
+            helpTip.style.fontSize = '12px';
+            helpTip.style.zIndex = '1000';
+            helpTip.style.maxWidth = '200px';
+            
+            document.querySelector('.canvas-container').appendChild(helpTip);
+            
+            // Hide the tooltip after 5 seconds
+            setTimeout(() => {
+                helpTip.style.opacity = '0';
+                helpTip.style.transition = 'opacity 0.5s ease';
+                
+                // Remove after fade
+                setTimeout(() => {
+                    helpTip.remove();
+                }, 500);
+            }, 5000);
+        }
+    }
+    
     // Initialize the application
     function init() {
         initLayers();
         initEventListeners();
         updateUndoRedoButtons();
+        applyMobileOptimizations();
     }
     
     // Start the application

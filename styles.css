@@ -250,6 +250,9 @@ body {
     position: relative;
     overflow: hidden;
     box-shadow: var(--shadow);
+    transform-origin: center center;
+    transition: transform 0.1s ease-out;
+    touch-action: none; /* Disable browser's default touch actions */
 }
 
 canvas {
@@ -496,10 +499,12 @@ canvas {
         flex-direction: row;
         overflow-x: auto;
         padding: 0.5rem;
+        -webkit-overflow-scrolling: touch;
     }
     
     .tool-group {
         min-width: 200px;
+        padding: 0 10px;
     }
     
     .sidebar {
@@ -507,10 +512,12 @@ canvas {
         max-height: 200px;
         overflow-x: auto;
         flex-direction: row;
+        -webkit-overflow-scrolling: touch;
     }
     
     .tool-properties, .layers-panel, .history-panel {
         min-width: 250px;
+        padding: 0 10px;
     }
 }
 
@@ -523,10 +530,68 @@ canvas {
     
     .file-actions {
         width: 100%;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    
+    .tool-btn, .btn {
+        padding: 0.8rem;
+        font-size: 0.85rem;
     }
     
     .canvas-container {
-        height: 50vh;
+        height: 40vh;
+    }
+    
+    .shape-options button,
+    .filter-options button {
+        min-height: 40px;
+    }
+    
+    .tool-btn i, .btn i {
+        margin-right: 5px;
+    }
+    
+    .slider-control input[type="range"] {
+        height: 30px;
+    }
+    
+    .color-picker input[type="color"] {
+        width: 44px;
+        height: 44px;
+    }
+    
+    /* Increase touch targets for better usability */
+    .layer-item, 
+    .filter-options button,
+    .text-controls button,
+    .dialog-buttons button {
+        min-height: 44px;
+    }
+    
+    /* Make dialogs more mobile-friendly */
+    .dialog {
+        width: 90%;
+        max-width: 320px;
+    }
+}
+
+/* Additional touch-specific improvements */
+@media (pointer: coarse) {
+    /* Styles for touch devices */
+    .tool-btn, .btn, button {
+        min-height: 44px; /* Apple's recommended minimum tap target size */
+    }
+    
+    /* Prevent text selection during touch operations */
+    .canvas-wrapper {
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    
+    /* Add visual feedback for touch */
+    .tool-btn:active, .btn:active {
+        transform: scale(0.98);
     }
 }
