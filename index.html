@@ -3,258 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F4ZE Editor - Photo & Logo Editor</title>
+    <title>F4ZE Editor - Photo Editor</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <meta name="description" content="F4ZE Editor - A powerful browser-based photo and logo editing tool.">
 </head>
 <body>
     <div class="app-container">
-        <!-- Header Section -->
         <header class="app-header">
             <div class="logo">
-                <h1>F4ZE Editor</h1>
+                <h1><span>F4ZE</span> Editor</h1>
             </div>
-            <div class="main-actions">
-                <button id="new-project-btn" class="btn btn-primary">New</button>
-                <button id="open-file-btn" class="btn">Open</button>
-                <input type="file" id="file-input" accept="image/*" style="display: none;">
-                <button id="save-btn" class="btn">Save</button>
-                <div class="dropdown">
-                    <button id="export-btn" class="btn dropdown-toggle">Export</button>
-                    <div class="dropdown-content">
-                        <a href="#" id="export-png">PNG</a>
-                        <a href="#" id="export-jpg">JPG</a>
-                    </div>
-                </div>
-            </div>
-            <div class="user-actions">
-                <button id="undo-btn" class="btn btn-icon" title="Undo"><i class="fas fa-undo"></i></button>
-                <button id="redo-btn" class="btn btn-icon" title="Redo"><i class="fas fa-redo"></i></button>
+            <div class="file-actions">
+                <button id="new-btn" class="btn"><i class="fas fa-file"></i> New</button>
+                <button id="upload-btn" class="btn"><i class="fas fa-upload"></i> Open</button>
+                <input type="file" id="upload-input" accept="image/*" style="display: none;">
+                <button id="save-btn" class="btn"><i class="fas fa-save"></i> Save</button>
+                <button id="export-btn" class="btn"><i class="fas fa-download"></i> Export</button>
             </div>
         </header>
 
-        <!-- Main Content Area -->
-        <main class="app-main">
-            <!-- Tools Panel -->
-            <aside class="tools-panel">
+        <div class="editor-container">
+            <div class="toolbar">
                 <div class="tool-group">
                     <h3>Tools</h3>
-                    <div class="tool-buttons">
-                        <button id="select-tool" class="tool-btn active" title="Select (V)"><i class="fas fa-mouse-pointer"></i></button>
-                        <button id="move-tool" class="tool-btn" title="Move (M)"><i class="fas fa-arrows-alt"></i></button>
-                        <button id="crop-tool" class="tool-btn" title="Crop (C)"><i class="fas fa-crop-alt"></i></button>
-                        <button id="brush-tool" class="tool-btn" title="Brush (B)"><i class="fas fa-paint-brush"></i></button>
-                        <button id="eraser-tool" class="tool-btn" title="Eraser (E)"><i class="fas fa-eraser"></i></button>
-                        <button id="text-tool" class="tool-btn" title="Text (T)"><i class="fas fa-font"></i></button>
-                        <button id="shape-tool" class="tool-btn" title="Shapes"><i class="fas fa-shapes"></i></button>
-                        <button id="fill-tool" class="tool-btn" title="Fill (F)"><i class="fas fa-fill-drip"></i></button>
-                        <button id="eyedropper-tool" class="tool-btn" title="Eyedropper (I)"><i class="fas fa-eye-dropper"></i></button>
+                    <button id="brush-tool" class="tool-btn active" data-tool="brush"><i class="fas fa-paint-brush"></i> Brush</button>
+                    <button id="eraser-tool" class="tool-btn" data-tool="eraser"><i class="fas fa-eraser"></i> Eraser</button>
+                    <button id="text-tool" class="tool-btn" data-tool="text"><i class="fas fa-font"></i> Text</button>
+                    <button id="shape-tool" class="tool-btn" data-tool="shape"><i class="fas fa-shapes"></i> Shape</button>
+                    <div class="shape-options hidden">
+                        <button data-shape="rectangle"><i class="fas fa-square"></i></button>
+                        <button data-shape="circle"><i class="fas fa-circle"></i></button>
+                        <button data-shape="line"><i class="fas fa-slash"></i></button>
                     </div>
                 </div>
 
                 <div class="tool-group">
-                    <h3>Shape Options</h3>
-                    <div class="shape-options" style="display: none;">
-                        <button id="rectangle-shape" class="shape-btn" title="Rectangle"><i class="fas fa-square"></i></button>
-                        <button id="circle-shape" class="shape-btn" title="Circle"><i class="fas fa-circle"></i></button>
-                        <button id="triangle-shape" class="shape-btn" title="Triangle"><i class="fas fa-play" style="transform: rotate(90deg);"></i></button>
-                        <button id="line-shape" class="shape-btn" title="Line"><i class="fas fa-minus"></i></button>
-                    </div>
+                    <h3>Image</h3>
+                    <button id="crop-tool" class="tool-btn" data-tool="crop"><i class="fas fa-crop"></i> Crop</button>
+                    <button id="resize-tool" class="tool-btn" data-tool="resize"><i class="fas fa-expand"></i> Resize</button>
+                    <button id="rotate-tool" class="tool-btn" data-tool="rotate"><i class="fas fa-sync"></i> Rotate</button>
+                    <button id="flip-tool" class="tool-btn" data-tool="flip"><i class="fas fa-exchange-alt"></i> Flip</button>
                 </div>
 
                 <div class="tool-group">
-                    <h3>Brush Size</h3>
-                    <input type="range" id="brush-size" min="1" max="50" value="5">
-                    <span id="brush-size-value">5px</span>
-                </div>
-
-                <div class="tool-group">
-                    <h3>Colors</h3>
-                    <div class="color-picker">
-                        <div class="current-colors">
-                            <div class="color-preview">
-                                <div id="primary-color" class="color-swatch" style="background-color: #000000;"></div>
-                                <input type="color" id="primary-color-picker" value="#000000">
-                            </div>
-                            <div class="color-preview">
-                                <div id="secondary-color" class="color-swatch" style="background-color: #ffffff;"></div>
-                                <input type="color" id="secondary-color-picker" value="#ffffff">
-                            </div>
-                        </div>
-                        <div class="palette">
-                            <div class="color-swatch" style="background-color: #000000;" data-color="#000000"></div>
-                            <div class="color-swatch" style="background-color: #ffffff;" data-color="#ffffff"></div>
-                            <div class="color-swatch" style="background-color: #ff0000;" data-color="#ff0000"></div>
-                            <div class="color-swatch" style="background-color: #00ff00;" data-color="#00ff00"></div>
-                            <div class="color-swatch" style="background-color: #0000ff;" data-color="#0000ff"></div>
-                            <div class="color-swatch" style="background-color: #ffff00;" data-color="#ffff00"></div>
-                            <div class="color-swatch" style="background-color: #00ffff;" data-color="#00ffff"></div>
-                            <div class="color-swatch" style="background-color: #ff00ff;" data-color="#ff00ff"></div>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Canvas Area -->
-            <section class="canvas-area">
-                <div class="canvas-container">
-                    <canvas id="main-canvas"></canvas>
-                </div>
-            </section>
-
-            <!-- Properties Panel -->
-            <aside class="properties-panel">
-                <div class="panel-section">
-                    <h3>Layers</h3>
-                    <div class="layer-controls">
-                        <button id="add-layer-btn" class="btn btn-sm"><i class="fas fa-plus"></i> Add Layer</button>
-                        <button id="delete-layer-btn" class="btn btn-sm"><i class="fas fa-trash"></i> Delete</button>
-                    </div>
-                    <div class="layers-list" id="layers-container">
-                        <!-- Layers will be added here dynamically -->
-                    </div>
-                </div>
-
-                <div class="panel-section">
                     <h3>Adjustments</h3>
-                    <div class="adjustment-control">
+                    <div class="slider-control">
                         <label for="brightness">Brightness</label>
                         <input type="range" id="brightness" min="-100" max="100" value="0">
                         <span id="brightness-value">0</span>
                     </div>
-                    <div class="adjustment-control">
+                    <div class="slider-control">
                         <label for="contrast">Contrast</label>
                         <input type="range" id="contrast" min="-100" max="100" value="0">
                         <span id="contrast-value">0</span>
                     </div>
-                    <div class="adjustment-control">
+                    <div class="slider-control">
                         <label for="saturation">Saturation</label>
                         <input type="range" id="saturation" min="-100" max="100" value="0">
                         <span id="saturation-value">0</span>
                     </div>
                 </div>
 
-                <div class="panel-section">
+                <div class="tool-group">
                     <h3>Filters</h3>
-                    <div class="filters-grid">
-                        <div class="filter-item" data-filter="none">
-                            <div class="filter-preview">Normal</div>
-                            <span>Normal</span>
+                    <div class="filter-options">
+                        <button data-filter="none" class="active">None</button>
+                        <button data-filter="grayscale">Grayscale</button>
+                        <button data-filter="sepia">Sepia</button>
+                        <button data-filter="invert">Invert</button>
+                        <button data-filter="blur">Blur</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <div class="canvas-wrapper">
+                    <canvas id="canvas"></canvas>
+                    <div id="crop-overlay" class="hidden"></div>
+                    <div id="text-input-container" class="hidden">
+                        <textarea id="text-input"></textarea>
+                        <div class="text-controls">
+                            <select id="font-family">
+                                <option value="Arial">Arial</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Georgia">Georgia</option>
+                            </select>
+                            <input type="number" id="font-size" value="24" min="8" max="72">
+                            <button id="apply-text"><i class="fas fa-check"></i></button>
+                            <button id="cancel-text"><i class="fas fa-times"></i></button>
                         </div>
-                        <div class="filter-item" data-filter="grayscale">
-                            <div class="filter-preview">Grayscale</div>
-                            <span>Grayscale</span>
+                    </div>
+                </div>
+                <div id="resize-dialog" class="dialog hidden">
+                    <h3>Resize Image</h3>
+                    <div class="resize-inputs">
+                        <div>
+                            <label for="resize-width">Width (px):</label>
+                            <input type="number" id="resize-width" min="1">
                         </div>
-                        <div class="filter-item" data-filter="sepia">
-                            <div class="filter-preview">Sepia</div>
-                            <span>Sepia</span>
+                        <div>
+                            <label for="resize-height">Height (px):</label>
+                            <input type="number" id="resize-height" min="1">
                         </div>
-                        <div class="filter-item" data-filter="invert">
-                            <div class="filter-preview">Invert</div>
-                            <span>Invert</span>
+                        <div class="checkbox-control">
+                            <input type="checkbox" id="maintain-aspect-ratio" checked>
+                            <label for="maintain-aspect-ratio">Maintain aspect ratio</label>
                         </div>
-                        <div class="filter-item" data-filter="blur">
-                            <div class="filter-preview">Blur</div>
-                            <span>Blur</span>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button id="apply-resize" class="btn">Apply</button>
+                        <button id="cancel-resize" class="btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="tool-properties">
+                    <h3>Properties</h3>
+                    <div class="brush-properties">
+                        <div class="slider-control">
+                            <label for="brush-size">Size</label>
+                            <input type="range" id="brush-size" min="1" max="50" value="5">
+                            <span id="brush-size-value">5px</span>
                         </div>
-                        <div class="filter-item" data-filter="vintage">
-                            <div class="filter-preview">Vintage</div>
-                            <span>Vintage</span>
+                        <div class="color-picker">
+                            <label for="brush-color">Color</label>
+                            <input type="color" id="brush-color" value="#000000">
                         </div>
                     </div>
                 </div>
 
-                <div class="panel-section text-properties" style="display: none;">
-                    <h3>Text Properties</h3>
-                    <div class="text-control">
-                        <label for="font-family">Font</label>
-                        <select id="font-family">
-                            <option value="Arial">Arial</option>
-                            <option value="Verdana">Verdana</option>
-                            <option value="Helvetica">Helvetica</option>
-                            <option value="Times New Roman">Times New Roman</option>
-                            <option value="Courier New">Courier New</option>
-                            <option value="Georgia">Georgia</option>
-                            <option value="Tahoma">Tahoma</option>
-                            <option value="Impact">Impact</option>
-                        </select>
+                <div class="layers-panel">
+                    <div class="panel-header">
+                        <h3>Layers</h3>
+                        <button id="add-layer" class="small-btn"><i class="fas fa-plus"></i></button>
                     </div>
-                    <div class="text-control">
-                        <label for="font-size">Size</label>
-                        <input type="number" id="font-size" min="8" max="72" value="16">
-                    </div>
-                    <div class="text-style-buttons">
-                        <button id="bold-text" class="text-style-btn"><i class="fas fa-bold"></i></button>
-                        <button id="italic-text" class="text-style-btn"><i class="fas fa-italic"></i></button>
-                        <button id="underline-text" class="text-style-btn"><i class="fas fa-underline"></i></button>
-                    </div>
+                    <ul id="layers-list"></ul>
                 </div>
-            </aside>
-        </main>
 
-        <!-- Status Bar -->
-        <footer class="app-footer">
-            <div class="canvas-info">
-                <span id="canvas-dimensions">Canvas: 800 × 600</span>
-            </div>
-            <div class="zoom-controls">
-                <button id="zoom-out-btn" class="btn btn-sm"><i class="fas fa-search-minus"></i></button>
-                <span id="zoom-level">100%</span>
-                <button id="zoom-in-btn" class="btn btn-sm"><i class="fas fa-search-plus"></i></button>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Welcome Modal -->
-    <div id="welcome-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Welcome to F4ZE Editor</h2>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <h3>Start a new project</h3>
-                <div class="new-project-options">
-                    <div class="option-group">
-                        <label for="canvas-width">Width:</label>
-                        <input type="number" id="canvas-width" value="800" min="1" max="4000">
-                        <span>px</span>
+                <div class="history-panel">
+                    <div class="panel-header">
+                        <h3>History</h3>
                     </div>
-                    <div class="option-group">
-                        <label for="canvas-height">Height:</label>
-                        <input type="number" id="canvas-height" value="600" min="1" max="4000">
-                        <span>px</span>
+                    <div class="history-actions">
+                        <button id="undo-btn" class="btn" disabled><i class="fas fa-undo"></i> Undo</button>
+                        <button id="redo-btn" class="btn" disabled><i class="fas fa-redo"></i> Redo</button>
                     </div>
-                    <div class="option-group">
-                        <label for="canvas-background">Background:</label>
-                        <input type="color" id="canvas-background" value="#ffffff">
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button id="create-new-canvas" class="btn btn-primary">Create New</button>
-                    <button id="open-existing-btn" class="btn">Open Existing</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Text Input Modal -->
-    <div id="text-input-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add Text</h2>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <textarea id="text-input" placeholder="Enter your text here..."></textarea>
-                <div class="modal-actions">
-                    <button id="confirm-text-btn" class="btn btn-primary">Add Text</button>
-                    <button id="cancel-text-btn" class="btn">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="notification" class="notification hidden"></div>
 
     <script src="script.js"></script>
 </body>
